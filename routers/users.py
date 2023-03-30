@@ -7,10 +7,13 @@ from sqlalchemy.orm import Session
 from typing import List
 from config.condb import get_db
 from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
 
 user = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login", scheme_name="Bearer")
 
 
 @user.get("/users", tags=["Users"], response_model=List[UserSchema])

@@ -1,6 +1,8 @@
 
 from fastapi import FastAPI
 from routers.users import user
+from routers.login import login
+
 from config.openapi import tags_metadata
 
 app = FastAPI(
@@ -11,3 +13,4 @@ app = FastAPI(
 )
 
 app.include_router(user)
+app.include_router(login)
