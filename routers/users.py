@@ -15,14 +15,14 @@ user = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@user.get("/users", tags=["Users"], response_model=List[UserSchema])
-def get_users(db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@user.get("/api/users", tags=["Users"], response_model=List[UserSchema])
+async def get_users(db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     isAktiv
     return db.query(Users).all()
 
 
-@user.get("/users/{user_id}", tags=["Users"], response_model=UserSchema)
-def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@user.get("/api/users/{user_id}", tags=["Users"], response_model=UserSchema)
+async def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     isAktiv
     dataUser = db.query(Users).filter(Users.id == user_id).first()
     if not dataUser:
@@ -30,8 +30,8 @@ def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(g
     return dataUser
 
 
-@user.post("/users", tags=["Users"], response_model=UserSchema)
-def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@user.post("/api/users", tags=["Users"], response_model=UserSchema)
+async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     isAktiv
     hashed_password = pwd_context.hash(user.password)
     data = Users(name=user.name, email=user.email,
@@ -42,11 +42,12 @@ def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depend
     return data
 
 
-@user.put("/users/{user_id}", tags=["Users"], response_model=UserSchema)
-def update_users(user_id: int, user: UserSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@user.put("/api/users/{user_id}", tags=["Users"], response_model=UserSchema)
+async def update_users(user_id: int, user: UserSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     isAktiv
     try:
         data = db.query(Users).filter(Users.id == user_id).first()
+        data.id = user.id
         data.name = user.name
         data.email = user.email
         data.rule = user.rule
@@ -57,8 +58,8 @@ def update_users(user_id: int, user: UserSchema, db: Session = Depends(get_db), 
         return HTTPException(status_code=404, detail="User tidak ada")
 
 
-@user.delete("/users/{user_id}", tags=["Users"], response_class=JSONResponse)
-def delete_user(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@user.delete("/api/users/{user_id}", tags=["Users"], response_class=JSONResponse)
+async def delete_user(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     isAktiv
     try:
         data = db.query(Users).filter(Users.id == user_id).first()
