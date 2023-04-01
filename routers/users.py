@@ -47,7 +47,6 @@ async def update_users(user_id: int, user: UserSchema, db: Session = Depends(get
     isAktiv
     try:
         data = db.query(Users).filter(Users.id == user_id).first()
-        data.id = user.id
         data.name = user.name
         data.email = user.email
         data.rule = user.rule
