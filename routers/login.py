@@ -36,6 +36,6 @@ async def read_users_me(current_user: Users = Depends(get_current_active_user)):
     return current_user
 
 
-@login.post("/logout")
+@login.post("/logout", tags=["Users"])
 async def logout_user(current_user: dict = Depends(get_current_user)):
     return {"message": "Successfully logged out"}
