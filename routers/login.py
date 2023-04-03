@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
 from sqlalchemy.orm import Session
-from config.auth_bearer import get_current_active_user
+from config.auth_bearer import get_current_active_user, get_current_user
 from config.condb import get_db
 from models.users import Users
 from schemas.users import UserSchema
@@ -34,3 +34,8 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @login.get("/me/", tags=["Users"], response_model=UserSchema)
 async def read_users_me(current_user: Users = Depends(get_current_active_user)):
     return current_user
+
+
+@login.post("/logout")
+async def logout_user(current_user: dict = Depends(get_current_user)):
+    return {"message": "Successfully logged out"}
