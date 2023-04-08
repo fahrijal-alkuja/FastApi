@@ -34,7 +34,7 @@ async def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Dep
     return dataUser
 
 
-@user.post("/api/users", tags=["Users"], response_model=UserSchema)
+@user.post("/api/users", tags=["Users"], response_model=UserGetSchema)
 async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     if not isAktiv:
         raise HTTPException(
