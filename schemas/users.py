@@ -12,3 +12,11 @@ class UserSchema(BaseModel):
 
 class UserAddSChema(UserSchema):
     password: str
+
+
+class UserGetSchema(UserSchema):
+    id: int
+
+
+class UserUpdate(UserSchema):
+    id: int

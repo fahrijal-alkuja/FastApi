@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from models.users import Users
-from schemas.users import UserSchema, UserAddSChema
+from schemas.users import UserGetSchema, UserSchema, UserAddSChema, UserUpdate
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -15,15 +15,19 @@ user = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@user.get("/api/users", tags=["Users"], response_model=List[UserSchema])
+@user.get("/api/users", tags=["Users"], response_model=List[UserGetSchema])
 async def get_users(db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
-    isAktiv
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     return db.query(Users).all()
 
 
-@user.get("/api/users/{user_id}", tags=["Users"], response_model=UserSchema)
+@user.get("/api/users/{user_id}", tags=["Users"], response_model=UserGetSchema)
 async def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
-    isAktiv
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     dataUser = db.query(Users).filter(Users.id == user_id).first()
     if not dataUser:
         raise HTTPException(status_code=404, detail="User not found")
@@ -32,7 +36,9 @@ async def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Dep
 
 @user.post("/api/users", tags=["Users"], response_model=UserSchema)
 async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
-    isAktiv
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     hashed_password = pwd_context.hash(user.password)
     data = Users(name=user.name, email=user.email,
                  password=hashed_password, rule=user.rule)
@@ -42,9 +48,11 @@ async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=
     return data
 
 
-@user.put("/api/users/{user_id}", tags=["Users"], response_model=UserSchema)
+@user.put("/api/users/{user_id}", tags=["Users"], response_model=UserUpdate)
 async def update_users(user_id: int, user: UserSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
-    isAktiv
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat menghapus user, akun tidak aktif")
     try:
         data = db.query(Users).filter(Users.id == user_id).first()
         data.name = user.name
@@ -58,12 +66,18 @@ async def update_users(user_id: int, user: UserSchema, db: Session = Depends(get
 
 
 @user.delete("/api/users/{user_id}", tags=["Users"], response_class=JSONResponse)
-async def delete_user(user_id: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
-    isAktiv
+async def delete_user(user_id: int, db: Session = Depends(get_db), isAktiv: bool = Depends(get_current_active_user)):
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat menghapus user, akun tidak aktif")
     try:
-        data = db.query(Users).filter(Users.id == user_id).first()
-        db.delete(data)
+        user = db.query(Users).filter(Users.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=404, detail=f"User dengan id {user_id} tidak ditemukan")
+        db.delete(user)
         db.commit()
-        return {f"User Dengan Id {user_id} Berhasil Dihapus": True}
+        return {f"User dengan Id {user_id} berhasil dihapus": True}
     except:
-        return HTTPException(status_code=404, detail="User tidak ada")
+        raise HTTPException(
+            status_code=500, detail="Terjadi kesalahan saat menghapus user")
