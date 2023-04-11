@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
-from models.prodi import Prodi
+from models.model import Prodi
 from schemas.prodis import ProdiGetSchema, ProdiSchema, ProdiUpdate
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session

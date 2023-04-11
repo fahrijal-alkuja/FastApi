@@ -1,12 +1,14 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
-from models.users import Users
+from models.model import Users, Prodi
 from schemas.users import UserGetSchema, UserSchema, UserAddSChema, UserUpdate
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 from config.condb import get_db
 from passlib.context import CryptContext
+from sqlalchemy.orm import joinedload
+
 
 from config.auth_bearer import get_current_active_user
 
@@ -40,7 +42,7 @@ async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     hashed_password = pwd_context.hash(user.password)
-    data = Users(name=user.name, email=user.email,
+    data = Users(prodi_id=user.prodi_id, name=user.name, email=user.email,
                  password=hashed_password, rule=user.rule)
     db.add(data)
     db.commit()
@@ -56,6 +58,7 @@ async def update_users(user_id: int, user: UserSchema, db: Session = Depends(get
     try:
         data = db.query(Users).filter(Users.id == user_id).first()
         data.name = user.name
+        data.prodi_id = user.prodi_id
         data.email = user.email
         data.rule = user.rule
         db.add(data)

@@ -5,7 +5,7 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 from config.auth_bearer import get_current_active_user, get_current_user
 from config.condb import get_db
-from models.users import Users
+from models.model import Users
 from schemas.users import UserSchema
 
 from config.auth_handler import authenticate_user, create_access_token

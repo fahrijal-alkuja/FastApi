@@ -2,7 +2,7 @@
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from models.users import Users
+from models.model import Users
 from passlib.context import CryptContext
 
 
