@@ -1,5 +1,6 @@
 from config.db import Base
 from sqlalchemy import Column, Integer, String
+from models.prodi import Prodi
 
 
 class Users(Base):
