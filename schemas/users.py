@@ -5,6 +5,7 @@ class UserSchema(BaseModel):
     name: str
     email: str
     rule: str
+    prodi_id: str
 
     class Config:
         orm_mode = True
