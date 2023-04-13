@@ -35,11 +35,17 @@ async def get_user_byid(user_id: int, db: Session = Depends(get_db), isAktiv=Dep
     return dataUser
 
 
+def is_email_exist(email: str, db: Session):
+    return db.query(Users).filter(Users.email == email).first() is not None
+
+
 @user.post("/api/users", tags=["Users"], response_model=UserGetSchema)
 async def add_users(user: UserAddSChema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     if not isAktiv:
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+    if is_email_exist(user.email, db):
+        raise HTTPException(status_code=400, detail="Email sudah terdaftar")
     hashed_password = pwd_context.hash(user.password)
     data = Users(prodi_id=user.prodi_id, name=user.name, email=user.email,
                  password=hashed_password, rule=user.rule)
