@@ -14,7 +14,7 @@ from config.auth_handler import ACCESS_TOKEN_EXPIRE_MINUTES
 login = APIRouter()
 
 
-@login.post("/login", tags=["Users"])
+@login.post("/login", tags=["Login"])
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -31,11 +31,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@login.get("/me/", tags=["Users"], response_model=UserSchema)
+@login.get("/me/", tags=["Login"], response_model=UserSchema)
 async def read_users_me(current_user: Users = Depends(get_current_active_user)):
     return current_user
 
 
-@login.post("/logout", tags=["Users"])
+@login.post("/logout", tags=["Login"])
 async def logout_user(current_user: dict = Depends(get_current_user)):
     return {"message": "Successfully logged out"}
