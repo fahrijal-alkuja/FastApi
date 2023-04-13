@@ -11,8 +11,9 @@ class Users(Base):
     email = Column(String(100), unique=True)
     password = Column(String(100))
     rule = Column(String(20))
-    prodi_id = Column(Integer, ForeignKey('prodi.id'))
-    prodi = relationship("Prodi", back_populates="user")
+    prodi_id = Column(Integer, ForeignKey(
+        'prodi.id', ondelete="CASCADE"), nullable=False)
+    prodi = relationship("Prodi")
 
 
 class Prodi(Base):
@@ -21,4 +22,3 @@ class Prodi(Base):
     id = Column(Integer, primary_key=True, index=True)
     code_prodi = Column(String(10), unique=True)
     nama_prodi = Column(String(20))
-    user = relationship("Users", back_populates="prodi")

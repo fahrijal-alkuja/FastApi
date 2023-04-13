@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from typing import List
 from config.condb import get_db
 from passlib.context import CryptContext
-from sqlalchemy.orm import joinedload
 
 
 from config.auth_bearer import get_current_active_user
@@ -23,7 +22,6 @@ async def get_users(db: Session = Depends(get_db), isAktiv=Depends(get_current_a
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     return db.query(Users).all()
-    # return db.query(Users).options(joinedload(Users.prodis)).all()
 
 
 @user.get("/api/users/{user_id}", tags=["Users"], response_model=UserGetSchema)
