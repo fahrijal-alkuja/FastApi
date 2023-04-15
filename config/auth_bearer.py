@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from models.model import Users
 from config.condb import get_db
 from sqlalchemy.orm import Session
-from config.auth_handler import SECRET_KEY
+from config.auth_handler import SECRET_KEY, check_token_expaid
 from config.auth_handler import ALGORITHM
 
 
@@ -19,9 +19,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
+
         if email is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Invalid authentication credentials")
+
+        if not check_token_expaid(token):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Token has expired")
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Invalid authentication credentials")

@@ -10,8 +10,12 @@ class ProdiSchema(BaseModel):
 
 
 class ProdiGetSchema(ProdiSchema):
-    id: int
+    id: str
+
+
+class ProdiAddSchema(ProdiSchema):
+    pass
 
 
 class ProdiUpdate(ProdiSchema):
-    id: int
+    pass

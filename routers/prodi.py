@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from models.model import Prodi
-from schemas.prodis import ProdiGetSchema, ProdiSchema, ProdiUpdate
+from schemas.prodis import ProdiAddSchema, ProdiGetSchema, ProdiSchema, ProdiUpdate
 from fastapi.responses import JSONResponse
 from config.condb import get_db
 
@@ -30,13 +30,13 @@ async def get_prodi_byid(code_prodi: int, db: Session = Depends(get_db), isAktiv
     return dataProdi
 
 
-@prodi.post("/api/prodi", tags=["Prodi"], response_model=ProdiGetSchema)
-async def add_prodi(prodi: ProdiSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+@prodi.post("/api/prodi", tags=["Prodi"], response_model=ProdiAddSchema)
+async def add_prodi(prodi: ProdiAddSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     if not isAktiv:
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
 
-    data = Prodi(code_prodi=prodi.code_prodi, nama_prodi=prodi.nama_prodi)
+    data = Prodi(**prodi.dict())
     db.add(data)
     db.commit()
     db.refresh(data)
@@ -44,21 +44,22 @@ async def add_prodi(prodi: ProdiSchema, db: Session = Depends(get_db), isAktiv=D
 
 
 @prodi.put("/api/prodi/{id_prodi}", tags=["Prodi"], response_model=ProdiUpdate)
-async def update_prodi(id_prodi: int, prodi: ProdiSchema, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+async def update_prodi(id_prodi: int, prodi: ProdiUpdate, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
     if not isAktiv:
         raise HTTPException(
             status_code=401, detail="Prodi Tidak Bisa Diupdate, akun tidak aktif")
-    try:
-        data = db.query(Prodi).filter(Prodi.id == id_prodi).first()
-        data.code_prodi = prodi.code_prodi
-        data.nama_prodi = prodi.nama_prodi
 
-        db.add(data)
-        db.commit()
-        db.refresh(data)
-        return data
-    except:
-        return HTTPException(status_code=404, detail="Prodi tidak ada")
+    data = db.query(Prodi).filter(Prodi.id == id_prodi)
+
+    if not data.first():
+        raise HTTPException(
+            status_code=404, detail="Prodi tidak ditemukan")
+
+    data.update(prodi.dict(exclude_unset=True))
+    db.commit()
+    db.refresh(data.first())
+
+    return data.first()
 
 
 @prodi.delete("/api/prodi/{id}", tags=["Prodi"], response_class=JSONResponse)
