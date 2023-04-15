@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers.users import user
 from routers.login import login
 from routers.prodi import prodi
+from routers.aktivitas_mhs import Aktivitas
 
 from config.openapi import tags_metadata
 
@@ -30,3 +31,4 @@ app.add_middleware(
 app.include_router(user)
 app.include_router(login)
 app.include_router(prodi)
+app.include_router(Aktivitas)

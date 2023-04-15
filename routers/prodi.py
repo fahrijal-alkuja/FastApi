@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from models.model import Prodi
 from schemas.prodis import ProdiGetSchema, ProdiSchema, ProdiUpdate
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 from config.condb import get_db
 
 from config.auth_bearer import get_current_active_user

@@ -7,6 +7,7 @@ DB_URL = "mysql+pymysql://root@localhost:3306/dbews"
 
 engine = create_engine(DB_URL)
 
-Base = declarative_base()
 
-SessionLocal = sessionmaker(autocommit=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
