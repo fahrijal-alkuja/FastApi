@@ -13,19 +13,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# def create_access_token(data: dict, expires_delta: timedelta):
-#     to_encode = data.copy()
-#     expire = datetime.utcnow() + expires_delta
-#     to_encode.update({"exp": expire})
-#     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-#     return encoded_jwt
-
-def create_access_token(data: dict, expires_delta: timedelta, expaid: str = None):
+def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    if expaid:
-        to_encode.update({"expaid": expaid})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
