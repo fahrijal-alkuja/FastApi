@@ -1,5 +1,3 @@
-
-
 from datetime import date
 from difflib import SequenceMatcher
 from itertools import combinations
