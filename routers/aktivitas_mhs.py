@@ -95,6 +95,9 @@ async def add_aktivitas(am: AmSchema, db: Session = Depends(get_db), isAktiv=Dep
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
 
     data = AktivitasMhs(
+        nim=am.nim,
+        nama=am.nama,
+        tahun_masuk=am.tahun_masuk,
         jenis_anggota=am.jenis_anggota,
         id_jenis_aktivitas=am.id_jenis_aktivitas,
         id_prodi=am.id_prodi,
@@ -117,6 +120,9 @@ async def update_aktivitas_mahasiswa(id: int, am: AmSchema, db: Session = Depend
     try:
         data = db.query(AktivitasMhs).filter(
             AktivitasMhs.id == id).first()
+        data.nim = am.nim,
+        data.nama = am.nama,
+        data.tahun_masuk = am.tahun_masuk,
         data.jenis_anggota = am.jenis_anggota,
         data.id_jenis_aktivitas = am.id_jenis_aktivitas,
         data.id_prodi = am.id_prodi,

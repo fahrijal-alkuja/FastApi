@@ -29,6 +29,9 @@ class AktivitasMhs(Base):
     __tablename__ = "aktivitas_mahasiswa"
 
     id = Column(Integer, primary_key=True, index=True)
+    nim = Column(String(10))
+    nama = Column(String(30))
+    tahun_masuk = Column(String(5))
     jenis_anggota = Column(String(4))
     id_jenis_aktivitas = Column(String(4))
     id_prodi = Column(String(9))

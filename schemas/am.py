@@ -4,6 +4,9 @@ from pydantic import BaseModel
 
 
 class AmSchema(BaseModel):
+    nim: str
+    nama: str
+    tahun_masuk: str
     jenis_anggota: str
     id_jenis_aktivitas: str
     id_prodi: str
