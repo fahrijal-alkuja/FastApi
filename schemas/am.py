@@ -11,10 +11,6 @@ class AmSchema(BaseModel):
     lokasi: str
     sk_tugas: str
     tanggal_sk_tugas: date
-    lama_tugas: str
-    similarity_scores: List[Tuple[str, float]] = []
-    # mirip_juduls: List[str] = []
-    average_similarity_score: float = 0.0
 
     class Config:
         orm_mode = True
@@ -26,3 +22,10 @@ class GetAktivits(AmSchema):
 
 class UpdateAktivits(AmSchema):
     id: int
+
+
+class Analisis(AmSchema):
+    lama_tugas: str
+    similarity_scores: List[Tuple[str, float]] = []
+    # mirip_juduls: List[str] = []
+    average_similarity_score: float = 0.0

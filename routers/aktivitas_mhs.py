@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from config.condb import get_db
 from models.model import AktivitasMhs
-from schemas.am import GetAktivits, UpdateAktivits, AmSchema
+from schemas.am import GetAktivits, UpdateAktivits, AmSchema, Analisis
 
 from config.auth_bearer import get_current_active_user
 
@@ -32,21 +32,7 @@ def calculate_similarity_matrix(juduls: List[str]) -> List[Tuple[str, str, float
     return [(a, b, similarity(a, b)) for a, b in combinations(juduls, 2)]
 
 
-# @Aktivitas.get("/api/am", tags=["Aktivitas_mhs"], response_model=List[AmSchema])
-# async def get_aktivitas(db: Session = Depends(get_db), IsAktiv=Depends(get_current_active_user)):
-#     if not IsAktiv:
-#         raise HTTPException(
-#             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
-#     aktivitas = db.query(AktivitasMhs).all()
-#     all_juduls = get_all_judul(db)
-#     similarity_matrix = calculate_similarity_matrix(all_juduls)
-#     for am in aktivitas:
-#         am.lama_tugas = hitung_lama_tugas(am.tanggal_sk_tugas)
-#         am.similarity_scores = [
-#             (b, score) for a, b, score in similarity_matrix if a == am.judul]
-#     return aktivitas
-
-@Aktivitas.get("/api/am", tags=["Aktivitas_mhs"], response_model=List[AmSchema])
+@Aktivitas.get("/api/am", tags=["Aktivitas_mhs"], response_model=List[Analisis])
 async def get_aktivitas(db: Session = Depends(get_db), IsAktiv=Depends(get_current_active_user)):
     if not IsAktiv:
         raise HTTPException(
