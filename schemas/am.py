@@ -19,12 +19,12 @@ class AmSchema(BaseModel):
         orm_mode = True
 
 
-class GetAktivitas(AmSchema):
-    id: int
+class AddAktivitas(AmSchema):
+    pass
 
 
 class UpdateAktivitas(AmSchema):
-    id: int
+    pass
 
 
 class Analisis(AmSchema):
