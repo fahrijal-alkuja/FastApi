@@ -16,15 +16,16 @@ class AmSchema(BaseModel):
         orm_mode = True
 
 
-class GetAktivits(AmSchema):
+class GetAktivitas(AmSchema):
     id: int
 
 
-class UpdateAktivits(AmSchema):
+class UpdateAktivitas(AmSchema):
     id: int
 
 
 class Analisis(AmSchema):
+    id: int
     lama_tugas: str
     similarity_scores: List[Tuple[str, float]] = []
     # mirip_juduls: List[str] = []
