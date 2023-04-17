@@ -46,11 +46,12 @@ class AktivitasMhs(Base):
 
 
 class Problem(Base):
-    __tablename__ = "proplem"
+    __tablename__ = "problem"
 
     id = Column(Integer, primary_key=True, index=True)
     keterangan = Column(String(200))
     lastupdate = Column(DateTime, nullable=False,
                         default=datetime.utcnow)
-    id_aktivitas = Column(Integer, ForeignKey('id_aktivitas'), nullable=False)
+    id_aktivitas = Column(Integer, ForeignKey(
+        'aktivitas_mahasiswa.id', ondelete="CASCADE"), nullable=False)
     aktivitas = relationship("AktivitasMhs")

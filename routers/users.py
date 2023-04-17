@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
-from models.model import Users, Prodi
+from models.model import Users
 from schemas.users import UserGetSchema, UserSchema, UserAddSChema, UserUpdate
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
