@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, timedelta
 from difflib import SequenceMatcher
 from itertools import combinations
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -28,6 +28,14 @@ def get_all_judul(db: Session) -> List[str]:
 def calculate_similarity_matrix(juduls: List[str]) -> List[Tuple[str, str, float]]:
     """Returns a matrix of similarity percentages between all pairs of 'judul' values."""
     return [(a, b, similarity(a, b)) for a, b in combinations(juduls, 2)]
+
+
+def hitung_jadwal_seminar(tanggal_sk_tugas: date, jangka_waktu: Optional[int] = 3) -> date:
+    return tanggal_sk_tugas + timedelta(days=30 * jangka_waktu)
+
+
+def hitung_jadwal_ujian(tanggal_seminar: date, jangka_waktu: Optional[int] = 3) -> date:
+    return tanggal_seminar + timedelta(days=30 * jangka_waktu)
 
 
 @Aktivitas.get("/api/am", tags=["Aktivitas_mhs"], response_model=List[Analisis])
@@ -57,6 +65,19 @@ async def get_aktivitas(db: Session = Depends(get_db), IsAktiv=Depends(get_curre
             am.average_similarity_score = total_score / num_scores
         else:
             am.average_similarity_score = 0
+
+         # hitung jadwal seminar dan ujian akhir
+        am.tanggal_seminar = hitung_jadwal_seminar(am.tanggal_sk_tugas)
+        am.tanggal_ujian = hitung_jadwal_ujian(am.tanggal_seminar)
+        # tampilkan warning jika tanggal seminar atau tanggal ujian sudah lewat
+        if date.today() > am.tanggal_seminar:
+            am.warning_seminar = f"Peringatan: Tanggal seminar ({am.tanggal_seminar.strftime('%d/%m/%Y')}) sudah lewat."
+        else:
+            am.warning_seminar = "Proses bimbingan"
+        if date.today() > am.tanggal_ujian:
+            am.warning_ujian = f"Peringatan: Tanggal ujian ({am.tanggal_ujian.strftime('%d/%m/%Y')}) sudah lewat."
+        else:
+            am.warning_ujian = "Proses Bimbingan"
 
     return aktivitas
 

@@ -33,3 +33,7 @@ class Analisis(AmSchema):
     similarity_scores: List[Tuple[str, float]] = []
     # mirip_juduls: List[str] = []
     average_similarity_score: float = 0.0
+    tanggal_seminar: date
+    tanggal_ujian: date
+    warning_ujian: str
+    warning_seminar: str
