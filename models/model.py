@@ -40,3 +40,5 @@ class AktivitasMhs(Base):
     sk_tugas = Column(String(50))
     tanggal_sk_tugas = Column(Date, nullable=False,
                               server_default="1970-01-01")
+    tanggal_seminar = Column(Date, nullable=True, server_default=None)
+    tanggal_ujian = Column(Date, nullable=True, server_default=None)

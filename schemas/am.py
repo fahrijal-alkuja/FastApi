@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from pydantic import BaseModel
 
 
@@ -35,5 +35,6 @@ class Analisis(AmSchema):
     average_similarity_score: float = 0.0
     tanggal_seminar: date
     tanggal_ujian: date
-    warning_ujian: str
-    warning_seminar: str
+
+    pesan_ujian: str
+    pesan_seminar: str

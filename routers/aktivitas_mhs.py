@@ -65,19 +65,17 @@ async def get_aktivitas(db: Session = Depends(get_db), IsAktiv=Depends(get_curre
             am.average_similarity_score = total_score / num_scores
         else:
             am.average_similarity_score = 0
+        # check if seminar date or ujian date has passed
+        today = date.today()
+        if am.tanggal_seminar and am.tanggal_seminar < today:
+            am.pesan_seminar = "Target seminar tidak terpenuhi."
+        else:
+            am.pesan_seminar = "Dalam Proses Bimbingan"
 
-         # hitung jadwal seminar dan ujian akhir
-        am.tanggal_seminar = hitung_jadwal_seminar(am.tanggal_sk_tugas)
-        am.tanggal_ujian = hitung_jadwal_ujian(am.tanggal_seminar)
-        # tampilkan warning jika tanggal seminar atau tanggal ujian sudah lewat
-        if date.today() > am.tanggal_seminar:
-            am.warning_seminar = f"Peringatan: Tanggal seminar ({am.tanggal_seminar.strftime('%d/%m/%Y')}) sudah lewat."
+        if am.tanggal_ujian and am.tanggal_ujian < today:
+            am.pesan_ujian = "Target ujian tidak terpenuhi."
         else:
-            am.warning_seminar = "Proses bimbingan"
-        if date.today() > am.tanggal_ujian:
-            am.warning_ujian = f"Peringatan: Tanggal ujian ({am.tanggal_ujian.strftime('%d/%m/%Y')}) sudah lewat."
-        else:
-            am.warning_ujian = "Proses Bimbingan"
+            am.pesan_ujian = "Dalam Proses Bimbingan"
 
     return aktivitas
 
@@ -113,6 +111,18 @@ async def get_aktivitas_by_prodi(id_prodi: int, db: Session = Depends(get_db), I
             am.average_similarity_score = total_score / num_scores
         else:
             am.average_similarity_score = 0
+
+         # check if seminar date or ujian date has passed
+        today = date.today()
+        if am.tanggal_seminar and am.tanggal_seminar < today:
+            am.pesan_seminar = "Target seminar tidak terpenuhi."
+        else:
+            am.pesan_seminar = "Dalam Proses Bimbingan"
+
+        if am.tanggal_ujian and am.tanggal_ujian < today:
+            am.pesan_ujian = "Target ujian tidak terpenuhi."
+        else:
+            am.pesan_ujian = "Dalam Proses Bimbingan"
 
     return aktivitas
 
@@ -151,6 +161,10 @@ async def add_aktivitas(am: AddAktivitas, db: Session = Depends(get_db), isAktiv
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
 
     data = AktivitasMhs(**am.dict())
+    # hitung tanggal seminar dan tanggal ujian
+    data.tanggal_seminar = hitung_jadwal_seminar(data.tanggal_sk_tugas)
+    data.tanggal_ujian = hitung_jadwal_ujian(data.tanggal_seminar)
+
     db.add(data)
     db.commit()
     db.refresh(data)
