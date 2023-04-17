@@ -1,5 +1,6 @@
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from datetime import datetime
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from config.db import Base
 
@@ -42,3 +43,14 @@ class AktivitasMhs(Base):
                               server_default="1970-01-01")
     tanggal_seminar = Column(Date, nullable=True, server_default=None)
     tanggal_ujian = Column(Date, nullable=True, server_default=None)
+
+
+class Problem(Base):
+    __tablename__ = "proplem"
+
+    id = Column(Integer, primary_key=True, index=True)
+    keterangan = Column(String(200))
+    lastupdate = Column(DateTime, nullable=False,
+                        default=datetime.utcnow)
+    id_aktivitas = Column(Integer, ForeignKey('id_aktivitas'), nullable=False)
+    aktivitas = relationship("AktivitasMhs")
