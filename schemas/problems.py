@@ -6,6 +6,7 @@ class Aktivitas(BaseModel):
     nim: str
     nama: str
     tahun_masuk: str
+    id_prodi: str
     judul: str
     lokasi: str
     sk_tugas: str
