@@ -49,9 +49,10 @@ class Problem(Base):
     __tablename__ = "problem"
 
     id = Column(Integer, primary_key=True, index=True)
-    keterangan = Column(String(200))
-    lastupdate = Column(DateTime, nullable=False,
-                        default=datetime.utcnow)
     id_aktivitas = Column(Integer, ForeignKey(
         'aktivitas_mahasiswa.id', ondelete="CASCADE"), nullable=False)
+    keterangan = Column(String(200))
+    solusi = Column(String(200), nullable=True)
+    lastupdate = Column(DateTime, nullable=False,
+                        default=datetime.utcnow)
     aktivitas = relationship("AktivitasMhs")

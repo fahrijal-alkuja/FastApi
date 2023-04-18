@@ -18,12 +18,14 @@ class Aktivitas(BaseModel):
 class ProblemSchema(BaseModel):
     id_aktivitas: int
     keterangan: str
+    solusi: str
 
     class Config:
         orm_mode = True
 
 
 class GetProblem(ProblemSchema):
+    id: int
     aktivitas: Aktivitas
 
 
