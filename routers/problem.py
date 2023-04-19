@@ -5,7 +5,7 @@ from config.condb import get_db
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends, HTTPException
 from models.model import Problem
-from schemas.problems import ProblemSchema, AddProblem, UpdateProblem, GetProblem
+from schemas.problems import AddProblem, UpdateProblem, GetProblem
 from config.auth_bearer import get_current_active_user
 problem = APIRouter()
 
@@ -50,6 +50,19 @@ async def get_problems(db: Session = Depends(get_db), isAktiv=Depends(get_curren
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     return db.query(Problem).all()
+
+
+@problem.get("/api/problems/{id_aktivitas}", tags=["Problem"], response_model=GetProblem)
+async def get_problem_by_id_aktivitas(id_aktivitas: int, db: Session = Depends(get_db), isAktiv=Depends(get_current_active_user)):
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+    problem = db.query(Problem).filter(
+        Problem.id_aktivitas == id_aktivitas).first()
+    if not problem:
+        raise HTTPException(
+            status_code=404, detail="Problem dengan id_aktivitas tersebut tidak ditemukan")
+    return problem
 
 
 @problem.post("/api/problem", tags=["Problem"], response_model=AddProblem)
