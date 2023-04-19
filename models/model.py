@@ -33,16 +33,19 @@ class AktivitasMhs(Base):
     nim = Column(String(10))
     nama = Column(String(30))
     tahun_masuk = Column(String(5))
-    jenis_anggota = Column(String(4))
-    id_jenis_aktivitas = Column(String(4))
     id_prodi = Column(String(9))
     judul = Column(String(100))
     lokasi = Column(String(50))
     sk_tugas = Column(String(50))
+    nama_pembimbing1 = Column(String(100), nullable=True)
+    nidn_pembimbing1 = Column(String(15), nullable=True)
+    nama_pembimbing2 = Column(String(100), nullable=True)
+    nidn_pembimbing2 = Column(String(15), nullable=True)
     tanggal_sk_tugas = Column(Date, nullable=False,
                               server_default="1970-01-01")
     tanggal_seminar = Column(Date, nullable=True, server_default=None)
     tanggal_ujian = Column(Date, nullable=True, server_default=None)
+    keterangan = Column(String(100), nullable=True)
 
 
 class Problem(Base):

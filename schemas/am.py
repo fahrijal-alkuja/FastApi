@@ -7,13 +7,16 @@ class AmSchema(BaseModel):
     nim: str
     nama: str
     tahun_masuk: str
-    jenis_anggota: str
-    id_jenis_aktivitas: str
     id_prodi: str
     judul: str
     lokasi: str
     sk_tugas: str
     tanggal_sk_tugas: date
+    nama_pembimbing1: str
+    nidn_pembimbing1: str
+    nama_pembimbing2: str
+    nidn_pembimbing2: str
+    keterangan: str
 
     class Config:
         orm_mode = True

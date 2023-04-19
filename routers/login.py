@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from config.auth_bearer import get_current_active_user, get_current_user
 from config.condb import get_db
 from models.model import Users
-from schemas.users import UserSchema
+from schemas.users import UserGetSchema, UserSchema
 
 from config.auth_handler import authenticate_user, create_access_token
 from config.auth_handler import ACCESS_TOKEN_EXPIRE_MINUTES
@@ -32,7 +32,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@login.get("/me/", tags=["Login"], response_model=UserSchema)
+@login.get("/me/", tags=["Login"], response_model=UserGetSchema)
 async def read_users_me(current_user: Users = Depends(get_current_active_user)):
     return current_user
 
