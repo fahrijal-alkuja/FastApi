@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from config.condb import get_db
 from models.model import AktivitasMhs
-from schemas.am import AddAktivitas, UpdateAktivitas, AmSchema, Analisis
+from schemas.am import AddAktivitas, UpdateAktivitas, Analisis
 
 from config.auth_bearer import get_current_active_user
 
@@ -25,9 +25,13 @@ def get_all_judul(db: Session) -> List[str]:
     return [row.judul for row in db.query(AktivitasMhs.judul).all()]
 
 
-def calculate_similarity_matrix(juduls: List[str]) -> List[Tuple[str, str, float]]:
-    """Returns a matrix of similarity percentages between all pairs of 'judul' values."""
-    return [(a, b, similarity(a, b)) for a, b in combinations(juduls, 2)]
+def get_judul_by_id_prodi_judul(db: Session, id_prodi: int) -> List[str]:
+    """Returns a list of judul values based on id_prodi and judul."""
+    # Query database untuk mengambil data judul yang sesuai dengan id_prodi dan judul
+    juduls = db.query(AktivitasMhs.judul).filter_by(
+        id_prodi=id_prodi).all()
+    # Kembalikan hasil dalam bentuk list
+    return [row.judul for row in juduls]
 
 
 def hitung_jadwal_seminar(tanggal_sk_tugas: date, jangka_waktu: Optional[int] = 3) -> date:
@@ -44,27 +48,10 @@ async def get_aktivitas(db: Session = Depends(get_db), IsAktiv=Depends(get_curre
         raise HTTPException(
             status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
     aktivitas = db.query(AktivitasMhs).all()
-    all_juduls = get_all_judul(db)
-    similarity_matrix = calculate_similarity_matrix(all_juduls)
+
     for am in aktivitas:
         # hitung lama tugas
         am.lama_tugas = hitung_lama_tugas(am.tanggal_sk_tugas)
-        similarity_scores = [
-            (b, score) for a, b, score in similarity_matrix if a == am.judul and score > 85]
-        # sort by descending similarity score
-        similarity_scores.sort(key=lambda x: x[1], reverse=True)
-        # list of similar juduls
-        am.mirip_juduls = [b for b, score in similarity_scores]
-        # list of (judul, score) tuples
-        am.similarity_scores = similarity_scores
-
-        # calculate average similarity score
-        total_score = sum(score for _, score in similarity_scores)
-        num_scores = len(similarity_scores)
-        if num_scores > 0:
-            am.average_similarity_score = total_score / num_scores
-        else:
-            am.average_similarity_score = 0
         # check if seminar date or ujian date has passed
         today = date.today()
         if am.tanggal_seminar and am.tanggal_seminar < today:
@@ -90,29 +77,11 @@ async def get_aktivitas_by_prodi(id_prodi: int, db: Session = Depends(get_db), I
     if not aktivitas:
         raise HTTPException(
             status_code=404, detail=f"Aktivitas mahasiswa dengan id_prodi {id_prodi} tidak ditemukan")
-    all_juduls = get_all_judul(db)
-    similarity_matrix = calculate_similarity_matrix(all_juduls)
+
     for am in aktivitas:
         # hitung lama tugas
         am.lama_tugas = hitung_lama_tugas(am.tanggal_sk_tugas)
-        similarity_scores = [
-            (b, score) for a, b, score in similarity_matrix if a == am.judul and score > 85]
-        # sort by descending similarity score
-        similarity_scores.sort(key=lambda x: x[1], reverse=True)
-        # list of similar juduls
-        am.mirip_juduls = [b for b, score in similarity_scores]
-        # list of (judul, score) tuples
-        am.similarity_scores = similarity_scores
-
-        # calculate average similarity score
-        total_score = sum(score for _, score in similarity_scores)
-        num_scores = len(similarity_scores)
-        if num_scores > 0:
-            am.average_similarity_score = total_score / num_scores
-        else:
-            am.average_similarity_score = 0
-
-         # check if seminar date or ujian date has passed
+        # check if seminar date or ujian date has passed
         today = date.today()
         if am.tanggal_seminar and am.tanggal_seminar < today:
             am.pesan_seminar = "Target seminar tidak terpenuhi."
@@ -152,6 +121,50 @@ def hitung_lama_tugas(tanggal_sk_tugas: date) -> str:
             return "1 day"
         else:
             return f"{total_days} days"
+
+
+@Aktivitas.get("/api/judul", tags=["Aktivitas_mhs"])
+async def cek_judul(judul: str, db: Session = Depends(get_db), IsAktiv=Depends(get_current_active_user)):
+    if not IsAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+
+    juduls = get_all_judul(db)
+    similarity_matrix = []
+    for judul_db in juduls:
+        sim = similarity(judul.lower(), judul_db.lower())
+        similarity_matrix.append(
+            {'judul_input': judul, 'judul_db': judul_db, 'similarity': round(sim, 2)})
+    similarity_matrix = [
+        similarity_item for similarity_item in similarity_matrix if similarity_item['similarity'] > 85]
+
+    # return similarity_matrix
+    if len(similarity_matrix) == 0:
+        return "Judul masih original"
+    else:
+        return similarity_matrix
+
+
+@Aktivitas.get("/api/judul/{id_prodi}", tags=["Aktivitas_mhs"])
+async def get_judul_by_id_prodi(id_prodi: int, judul: str, db: Session = Depends(get_db), IsAktiv=Depends(get_current_active_user)):
+    if not IsAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+    juduls = get_judul_by_id_prodi_judul(db, id_prodi=id_prodi)
+    similarity_matrix = []
+    for judul_db in juduls:
+        sim = similarity(judul.lower(), judul_db.lower())
+
+        similarity_matrix.append(
+            {'judul_input': judul, 'judul_db': judul_db, 'similarity': round(sim, 2)})
+    similarity_matrix = [
+        similarity_item for similarity_item in similarity_matrix if similarity_item['similarity'] > 85]
+
+    # return similarity_matrix
+    if len(similarity_matrix) == 0:
+        return "Judul masih original"
+    else:
+        return similarity_matrix
 
 
 @Aktivitas.post("/api/am", tags=["Aktivitas_mhs"], response_model=AddAktivitas)

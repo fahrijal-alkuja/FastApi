@@ -1,6 +1,7 @@
 
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Date
+from enum import Enum
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Date, Enum as EnumColumn
 from sqlalchemy.orm import relationship
 from config.db import Base
 
@@ -26,6 +27,14 @@ class Prodi(Base):
     nama_prodi = Column(String(20))
 
 
+class SemesterEnum(Enum):
+    """
+    Enum untuk tipe data semester.
+    """
+    GANJIL = "Ganjil"
+    GENAP = "Genap"
+
+
 class AktivitasMhs(Base):
     __tablename__ = "aktivitas_mahasiswa"
 
@@ -46,6 +55,8 @@ class AktivitasMhs(Base):
     tanggal_seminar = Column(Date, nullable=True, server_default=None)
     tanggal_ujian = Column(Date, nullable=True, server_default=None)
     keterangan = Column(String(100), nullable=True)
+    # tahun = Column(String(4))
+    # semester = Column(EnumColumn(SemesterEnum), nullable=True)
 
 
 class Problem(Base):

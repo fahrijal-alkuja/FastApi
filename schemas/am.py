@@ -17,6 +17,8 @@ class AmSchema(BaseModel):
     nama_pembimbing2: str
     nidn_pembimbing2: str
     keterangan: str
+    # tahun: str
+    # semester: str
 
     class Config:
         orm_mode = True
@@ -33,9 +35,9 @@ class UpdateAktivitas(AmSchema):
 class Analisis(AmSchema):
     id: int
     lama_tugas: str
-    similarity_scores: List[Tuple[str, float]] = []
+    # similarity_scores: List[Tuple[str, float]] = []
     # mirip_juduls: List[str] = []
-    average_similarity_score: float = 0.0
+    # average_similarity_score: float = 0.0
     tanggal_seminar: date
     tanggal_ujian: date
 
