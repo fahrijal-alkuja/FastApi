@@ -264,28 +264,39 @@ async def analisis_Ipk(prodi: str, tahun: int, isAktiv=Depends(get_current_activ
     # return data
     # Perform analysis and return data
     for mahasiswa in data:
-        sks_total = int(mahasiswa["sks_total"])
-        ipk = float(mahasiswa["ipk"])
-        semester = int(mahasiswa["semester"])
+        sks_total = mahasiswa["sks_total"]
+        if sks_total is not None:
+            sks_total = int(sks_total)
+            ipk = float(mahasiswa["ipk"])
+            semester = int(mahasiswa["semester"])
 
         if ipk >= 2.50:
-            if semester == 1 and sks_total < 15:
-                mahasiswa['peringatan'] = "Peringatan Tertulis"
-            elif semester == 2 and sks_total < 30:
-                mahasiswa['peringatan'] = "Peringatan Tertulis"
-            elif semester == 3 and sks_total < 45:
-                mahasiswa['peringatan'] = "Peringatan Tertulis"
-            elif semester == 4 and sks_total < 60:
-                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
-            elif semester == 5 and sks_total < 75:
-                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
-            elif semester == 6 and sks_total < 90:
-                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
-            elif semester == 7 and sks_total < 115:
-                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
-            elif semester == 8 and sks_total < 130:
-                mahasiswa['peringatan'] = "Surat Peringatan DO"
-            elif semester > 8 and sks_total < 144:
-                mahasiswa['peringatan'] = "Surat Peringatan DO"
+            if semester == 1:
+                if sks_total is not None and sks_total < 15:
+                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 2:
+                if sks_total is not None and sks_total < 30:
+                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 3:
+                if sks_total is not None and sks_total < 45:
+                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 4:
+                if sks_total is not None and sks_total < 60:
+                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 5:
+                if sks_total is not None and sks_total < 75:
+                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 6:
+                if sks_total is not None and sks_total < 90:
+                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 7:
+                if sks_total is not None and sks_total < 115:
+                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 8:
+                if sks_total is not None and sks_total < 130:
+                    mahasiswa['peringatan'] = "Surat Peringatan DO"
+            elif semester > 8:
+                if sks_total is not None and sks_total < 144:
+                    mahasiswa['peringatan'] = "Surat Peringatan DO"
 
     return data
