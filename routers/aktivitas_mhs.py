@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from config.condb import get_db
 from models.model import AktivitasMhs
 from schemas.am import AddAktivitas, UpdateAktivitas, Analisis
-
+import aiohttp
 from config.auth_bearer import get_current_active_user
 
 Aktivitas = APIRouter()
@@ -96,6 +96,33 @@ async def get_aktivitas_by_prodi(id_prodi: int, db: Session = Depends(get_db), I
     return aktivitas
 
 
+@Aktivitas.get("/api/am/byid/{id}", tags=["Aktivitas_mhs"], response_model=List[Analisis])
+async def get_aktivitas_by_id(id: int, db: Session = Depends(get_db), IsAktiv=Depends(get_current_active_user)):
+    if not IsAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+    aktivitas = db.query(AktivitasMhs).filter(AktivitasMhs.id == id).all()
+    if not aktivitas:
+        raise HTTPException(
+            status_code=404, detail=f"Aktivitas mahasiswa dengan id {id} tidak ditemukan")
+    for am in aktivitas:
+        # hitung lama tugas
+        am.lama_tugas = hitung_lama_tugas(am.tanggal_sk_tugas)
+        # check if seminar date or ujian date has passed
+        today = date.today()
+        if am.tanggal_seminar and am.tanggal_seminar < today:
+            am.pesan_seminar = "Target seminar tidak terpenuhi."
+        else:
+            am.pesan_seminar = "Dalam Proses Bimbingan"
+
+        if am.tanggal_ujian and am.tanggal_ujian < today:
+            am.pesan_ujian = "Target ujian tidak terpenuhi."
+        else:
+            am.pesan_ujian = "Dalam Proses Bimbingan"
+
+    return aktivitas
+
+
 def hitung_lama_tugas(tanggal_sk_tugas: date) -> str:
     today = date.today()
     delta = today - tanggal_sk_tugas
@@ -140,7 +167,7 @@ async def cek_judul(judul: str, db: Session = Depends(get_db), IsAktiv=Depends(g
 
     # return similarity_matrix
     if len(similarity_matrix) == 0:
-        return "Judul masih original"
+        return {"message": "Judul masih original"}
     else:
         return similarity_matrix
 
@@ -162,7 +189,7 @@ async def get_judul_by_id_prodi(id_prodi: int, judul: str, db: Session = Depends
 
     # return similarity_matrix
     if len(similarity_matrix) == 0:
-        return "Judul masih original"
+        return {"message": "Judul masih original"}
     else:
         return similarity_matrix
 
@@ -219,3 +246,46 @@ async def delete_Aktivitas_mahasiswa(id: int, db: Session = Depends(get_db), isA
     except:
         raise HTTPException(
             status_code=500, detail="Terjadi kesalahan saat menghapus user")
+
+
+@Aktivitas.get("/api/evaluasi", tags=["Aktivitas_mhs"])
+async def analisis_Ipk(prodi: str, tahun: int, isAktiv=Depends(get_current_active_user)):
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+
+    # Call external API to perform analysis
+    url = f"https://api.unikarta.ac.id/api/ipk?prodi={prodi}&tahun={tahun}"
+    headers = {'API-KEY': 'alkuja07'}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            data = await response.json()
+
+    # return data
+    # Perform analysis and return data
+    for mahasiswa in data:
+        sks_total = int(mahasiswa["sks_total"])
+        ipk = float(mahasiswa["ipk"])
+        semester = int(mahasiswa["semester"])
+
+        if ipk >= 2.50:
+            if semester == 1 and sks_total < 15:
+                mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 2 and sks_total < 30:
+                mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 3 and sks_total < 45:
+                mahasiswa['peringatan'] = "Peringatan Tertulis"
+            elif semester == 4 and sks_total < 60:
+                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 5 and sks_total < 75:
+                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 6 and sks_total < 90:
+                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 7 and sks_total < 115:
+                mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+            elif semester == 8 and sks_total < 130:
+                mahasiswa['peringatan'] = "Surat Peringatan DO"
+            elif semester > 8 and sks_total < 144:
+                mahasiswa['peringatan'] = "Surat Peringatan DO"
+
+    return data
