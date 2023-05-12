@@ -262,44 +262,83 @@ async def analisis_Ipk(prodi: str, tahun: int, isAktiv=Depends(get_current_activ
             data = await response.json()
 
     # return data
+    filtered_data = list(filter(
+        lambda x: x['status_mahasiswa'] == 'A' or x['status_mahasiswa'] == 'C', data))
+    mahasiswa_dgn_peringatan = 0
+    mahasiswa_dgn_warning = 0
     # Perform analysis and return data
-    for mahasiswa in data:
+    mahasiswa_dgn_peringatan = []
+    for mahasiswa in filtered_data:
         sks_total = mahasiswa["sks_total"]
         if sks_total is not None:
             sks_total = int(sks_total)
             ipk = float(mahasiswa["ipk"])
             semester = int(mahasiswa["semester"])
 
-        if ipk >= 2.50:
             if semester == 1:
                 if sks_total is not None and sks_total < 15:
-                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Peringatan Pertama"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 2:
                 if sks_total is not None and sks_total < 30:
-                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Peringatan Pertama"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 3:
                 if sks_total is not None and sks_total < 45:
-                    mahasiswa['peringatan'] = "Peringatan Tertulis"
+                    mahasiswa['peringatan'] = " Evaluasi Kedua Pertama Prodi Memberikan Peringatan Tertulis"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 4:
                 if sks_total is not None and sks_total < 60:
-                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Surat Peringatan Kedua"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 5:
                 if sks_total is not None and sks_total < 75:
-                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+                    mahasiswa['peringatan'] = " Ketua Prodi Memberikan Surat Peringatan Kedua"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 6:
                 if sks_total is not None and sks_total < 90:
-                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Surat Peringatan Kedua"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 7:
                 if sks_total is not None and sks_total < 115:
-                    mahasiswa['peringatan'] = "Surat Peringatan Terakhir"
+                    mahasiswa['peringatan'] = "Evaluasi Kedua Ketua Prodi Memberikan Surat Peringatan Terakhir"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester == 8:
                 if sks_total is not None and sks_total < 130:
-                    mahasiswa['peringatan'] = "Surat Peringatan DO"
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Usulan DO"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
             elif semester > 8:
-                if sks_total is not None and sks_total < 144:
-                    mahasiswa['peringatan'] = "Surat Peringatan DO"
+                if sks_total is not None and sks_total < 145:
+                    mahasiswa['peringatan'] = "Ketua Prodi Memberikan Usulan DO"
+                    mahasiswa_dgn_peringatan.append(mahasiswa)
+                if ipk is not None and ipk < 2.50:
+                    mahasiswa['warning'] = "IPK Tidak Memeneuhi Standar Evaluasi"
 
-    return data
+    # return filtered_data
+    # Calculate percentage of students with warning
+    persentase_peringatan = (
+        len(mahasiswa_dgn_peringatan) / len(filtered_data)) * 100
+
+    # Return data
+    output_data = {'persentase_peringatan': f"{persentase_peringatan:.2f}%",
+                   'data': filtered_data}
+    return output_data
 
 
 @Aktivitas.get("/api/reg", tags=["Aktivitas_mhs"])
