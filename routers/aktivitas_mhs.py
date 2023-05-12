@@ -300,3 +300,65 @@ async def analisis_Ipk(prodi: str, tahun: int, isAktiv=Depends(get_current_activ
                     mahasiswa['peringatan'] = "Surat Peringatan DO"
 
     return data
+
+
+@Aktivitas.get("/api/reg", tags=["Aktivitas_mhs"])
+async def analisis_Ipk(tahun: str, kodeAkun: str,  prodi: str, isAktiv=Depends(get_current_active_user)):
+    if not isAktiv:
+        raise HTTPException(
+            status_code=401, detail="Tidak dapat mengakses data user, akun tidak aktif")
+
+       # Call external API to perform analysis
+    # url = f"http://api.unikarta.ac.id/api/tunggakan?tahun=2022&kodeAkun=04&prodi=61201"
+    url = f"http://api.unikarta.ac.id/api/tunggakan?tahun={tahun}&kodeAkun={kodeAkun}&prodi={prodi}"
+    headers = {'API-KEY': 'alkuja07'}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            data = await response.json()
+    # return data
+    # Process the data
+    results = process_data(data)
+
+    return results
+
+
+def process_data(data):
+    results = {}
+    for item in data:
+        nim = item['nim']
+        if nim not in results:
+            results[nim] = {
+                'nim': nim,
+                'nama_mahasiswa': item['nama_mahasiswa'],
+                'jumlah_tunggakan': 0,
+                'jumlah_tagihan': 0,
+                'tunggakan': []
+            }
+
+        tagihan = int(item['tagihan'])
+        results[nim]['jumlah_tagihan'] += tagihan
+
+        if tagihan > 0:
+            results[nim]['jumlah_tunggakan'] += 1
+            results[nim]['tunggakan'].append({
+                'tagihan': item['tagihan'],
+                'deskripsi_pendek': item['deskripsi_pendek'],
+                'periode': item['periode'],
+                'tahun_akademik': item['tahun_akademik']
+            })
+
+    # Remove students with no outstanding payment
+    results = [result for result in results.values(
+    ) if result['jumlah_tunggakan'] > 0]
+
+    # Sort the results by NIM
+    results = sorted(results, key=lambda x: x['nim'])
+
+    # Format the results
+    for result in results:
+        tunggakan = result['tunggakan']
+        if len(tunggakan) == 1 and tunggakan[0]['tagihan'] == '':
+            tunggakan = []
+        result['tunggakan'] = tunggakan
+
+    return results
